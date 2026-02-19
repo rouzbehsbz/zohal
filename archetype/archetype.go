@@ -12,16 +12,16 @@ type Archetype struct {
 	componentIndex map[int]int
 }
 
-func NewArchetype(components []component.ComponentEntry) *Archetype {
+func NewArchetype(entries []component.ComponentEntry) *Archetype {
 	columns := []ColumnEntry{}
-	componentIndex := make(map[int]int, len(components))
+	componentIndex := make(map[int]int, len(entries))
 
-	for _, component := range components {
+	for _, entry := range entries {
 		index := len(columns)
 
-		columns = append(columns, NewColumnEntry(component.Id, component.ElemType))
+		columns = append(columns, NewColumnEntry(entry.Id, entry.ElemType))
 
-		componentIndex[component.Id] = index
+		componentIndex[entry.Id] = index
 	}
 
 	return &Archetype{
@@ -29,6 +29,16 @@ func NewArchetype(components []component.ComponentEntry) *Archetype {
 		columns:        columns,
 		componentIndex: componentIndex,
 	}
+}
+
+func (a *Archetype) IsEntityAlive(entity entity.Entity, row int) bool {
+	if row >= len(a.entities) {
+		return false
+	}
+
+	e := a.entities[row]
+
+	return e.Index == entity.Index && e.Generation == entity.Generation
 }
 
 func (a *Archetype) AddEntity(entity entity.Entity) int {
@@ -60,7 +70,11 @@ func (a *Archetype) RemoveEntity(row int) (entity.Entity, int, bool) {
 		}
 	}
 
-	return swapped, row, true
+	if row != lastIndex {
+		return swapped, row, true
+	}
+
+	return entity.Entity{}, 0, true
 }
 
 func (a *Archetype) AddComponent(row int, componentId int, component any) bool {

@@ -46,8 +46,10 @@ func (v *Vector) Remove(index int) bool {
 
 	lastIndex := length - 1
 
-	lastValue := v.data.Index(lastIndex)
-	v.data.Index(index).Set(lastValue)
+	if index != lastIndex {
+		lastValue := v.data.Index(lastIndex)
+		v.data.Index(index).Set(lastValue)
+	}
 
 	v.data = v.data.Slice(0, lastIndex)
 
