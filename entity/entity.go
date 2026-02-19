@@ -1,11 +1,11 @@
 package entity
 
 type Entity struct {
-	Index      uint32
-	Generation uint32
+	Index      int
+	Generation int
 }
 
-func NewEntity(index, generation uint32) Entity {
+func NewEntity(index, generation int) Entity {
 	return Entity{
 		Index:      index,
 		Generation: generation,

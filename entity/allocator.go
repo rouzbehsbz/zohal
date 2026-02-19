@@ -1,14 +1,14 @@
 package entity
 
 type EntityAllocator struct {
-	generations []uint32
-	availables  []uint32
+	generations []int
+	availables  []int
 }
 
 func NewEntityAllocator() *EntityAllocator {
 	return &EntityAllocator{
-		generations: []uint32{},
-		availables:  []uint32{},
+		generations: []int{},
+		availables:  []int{},
 	}
 }
 
@@ -17,7 +17,7 @@ func (e *EntityAllocator) Create() Entity {
 		index := len(e.generations)
 		e.generations = append(e.generations, 0)
 
-		return NewEntity(uint32(index), 0)
+		return NewEntity(index, 0)
 	}
 
 	lastIndex := len(e.availables) - 1
@@ -26,7 +26,7 @@ func (e *EntityAllocator) Create() Entity {
 	e.availables = e.availables[:lastIndex]
 	generation := e.generations[index]
 
-	return NewEntity(uint32(index), generation)
+	return NewEntity(index, generation)
 }
 
 func (e *EntityAllocator) Delete(entity Entity) bool {
@@ -41,7 +41,7 @@ func (e *EntityAllocator) Delete(entity Entity) bool {
 }
 
 func (e *EntityAllocator) IsAlive(entity Entity) bool {
-	if int(entity.Index) >= len(e.generations) {
+	if entity.Index >= len(e.generations) {
 		return false
 	}
 
