@@ -29,18 +29,14 @@ func (e *EntityAllocator) Create() Entity {
 	return NewEntity(index, generation)
 }
 
-func (e *EntityAllocator) Delete(entity Entity) bool {
-	if e.IsAlive(entity) {
+func (e *EntityAllocator) Delete(entity Entity) {
+	if e.isAlive(entity) {
 		e.availables = append(e.availables, entity.Index)
 		e.generations[entity.Index] += 1
-
-		return true
 	}
-
-	return false
 }
 
-func (e *EntityAllocator) IsAlive(entity Entity) bool {
+func (e *EntityAllocator) isAlive(entity Entity) bool {
 	if entity.Index >= len(e.generations) {
 		return false
 	}

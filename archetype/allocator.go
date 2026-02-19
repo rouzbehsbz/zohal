@@ -22,7 +22,7 @@ func NewArchetypeAllocator(registry *component.ComponentRegistry) *ArchetypeAllo
 	}
 }
 
-func (a *ArchetypeAllocator) AddComponents(entity entity.Entity, components ...any) bool {
+func (a *ArchetypeAllocator) AddComponents(entity entity.Entity, components ...any) {
 	var mask Mask
 	entries := make([]component.ComponentEntry, 0, len(components))
 
@@ -32,64 +32,44 @@ func (a *ArchetypeAllocator) AddComponents(entity entity.Entity, components ...a
 		entries = append(entries, component.NewComponentEntry(id, reflect.TypeOf(c)))
 	}
 
-	targetArchetype := a.Archetype(mask, entries)
+	targetArchetype, ok := a.archetypes[mask]
+	if !ok {
+		targetArchetype = NewArchetype(entries)
+		a.archetypes[mask] = targetArchetype
+	}
 
 	location, exists := a.locations[entity]
 	if !exists {
-		return a.AddNewEntity(entity, targetArchetype, mask, components)
+		a.AddNewEntity(entity, targetArchetype, mask, components)
+		return
 	}
 
 	if mask == location.Mask {
-		return a.SetComponents(targetArchetype, location.Row, components)
+		a.SetComponents(targetArchetype, location.Row, components)
+		return
 	}
 
-	return a.MoveEntity(entity, location, targetArchetype, mask)
+	a.MoveEntity(entity, location, targetArchetype, mask)
 }
 
-func (a *ArchetypeAllocator) RemoveEntity(entity entity.Entity) bool {
-	location, exists := a.locations[entity]
-	if !exists {
-		return false
-	}
-
+func (a *ArchetypeAllocator) RemoveEntity(entity entity.Entity) {
+	location := a.locations[entity]
 	archetype := a.archetypes[location.Mask]
-	if archetype == nil {
-		return false
-	}
 
 	archetype.RemoveEntity(location.Row)
 	delete(a.locations, entity)
-
-	return true
 }
 
-func (a *ArchetypeAllocator) AddNewEntity(entity entity.Entity, archetype *Archetype, mask Mask, components []any) bool {
+func (a *ArchetypeAllocator) AddNewEntity(entity entity.Entity, archetype *Archetype, mask Mask, components []any) {
 	row := archetype.AddEntity(entity)
 
-	if !a.SetComponents(archetype, row, components) {
-		return false
-	}
+	a.SetComponents(archetype, row, components)
 
 	a.locations[entity] = NewEntityLocation(mask, row)
-	return true
 }
 
-func (a *ArchetypeAllocator) Archetype(mask Mask, entries []component.ComponentEntry) *Archetype {
-	if arch, ok := a.archetypes[mask]; ok {
-		return arch
-	}
-
-	arch := NewArchetype(entries)
-	a.archetypes[mask] = arch
-
-	return arch
-}
-
-func (a *ArchetypeAllocator) MoveEntity(entity entity.Entity, location EntityLocation, target *Archetype, newMask Mask) bool {
-	source, ok := a.archetypes[location.Mask]
-	if !ok {
-		return false
-	}
+func (a *ArchetypeAllocator) MoveEntity(entity entity.Entity, location EntityLocation, target *Archetype, newMask Mask) {
+	source := a.archetypes[location.Mask]
 
 	newRow := target.AddEntity(entity)
 
@@ -97,17 +77,11 @@ func (a *ArchetypeAllocator) MoveEntity(entity entity.Entity, location EntityLoc
 	source.RemoveEntity(location.Row)
 
 	a.locations[entity] = NewEntityLocation(newMask, newRow)
-
-	return true
 }
 
-func (a *ArchetypeAllocator) SetComponents(archetype *Archetype, row int, components []any) bool {
+func (a *ArchetypeAllocator) SetComponents(archetype *Archetype, row int, components []any) {
 	for _, c := range components {
 		id := a.registry.ComponentId(c)
-		if !archetype.AddComponent(row, id, c) {
-			return false
-		}
+		archetype.AddComponent(row, id, c)
 	}
-
-	return true
 }

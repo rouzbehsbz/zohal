@@ -52,10 +52,10 @@ func (a *Archetype) AddEntity(entity entity.Entity) int {
 	return row
 }
 
-func (a *Archetype) RemoveEntity(row int) (entity.Entity, int, bool) {
+func (a *Archetype) RemoveEntity(row int) (entity.Entity, int) {
 	length := len(a.entities)
 	if row >= length {
-		return entity.Entity{}, 0, false
+		return entity.Entity{}, -1
 	}
 
 	lastIndex := length - 1
@@ -65,40 +65,25 @@ func (a *Archetype) RemoveEntity(row int) (entity.Entity, int, bool) {
 	a.entities = a.entities[:lastIndex]
 
 	for _, entry := range a.columns {
-		if ok := entry.Column.Remove(row); !ok {
-			return entity.Entity{}, 0, false
-		}
+		entry.Column.Remove(row)
 	}
 
 	if row != lastIndex {
-		return swapped, row, true
+		return swapped, row
 	}
 
-	return entity.Entity{}, 0, true
+	return entity.Entity{}, -1
 }
 
-func (a *Archetype) AddComponent(row int, componentId int, component any) bool {
-	columnIndex, ok := a.componentIndex[componentId]
-	if !ok {
-		return false
-	}
-
+func (a *Archetype) AddComponent(row int, componentId int, component any) {
+	columnIndex := a.componentIndex[componentId]
 	entry := a.columns[columnIndex]
-
-	return entry.Column.Set(row, component)
+	entry.Column.Set(row, component)
 }
 
-func (a *Archetype) MoveComponents(row int, dstRow int, dstArchetype *Archetype) bool {
+func (a *Archetype) MoveComponents(row int, dstRow int, dstArchetype *Archetype) {
 	for _, entry := range a.columns {
-		component, ok := entry.Column.Get(row)
-		if !ok {
-			return false
-		}
-
-		if ok := dstArchetype.AddComponent(dstRow, entry.ComponentId, component); !ok {
-			return false
-		}
+		component := entry.Column.Get(row)
+		dstArchetype.AddComponent(dstRow, entry.ComponentId, component)
 	}
-
-	return true
 }

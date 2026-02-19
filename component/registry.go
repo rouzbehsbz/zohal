@@ -10,6 +10,7 @@ type ComponentRegistry struct {
 func NewComponentRegistry() *ComponentRegistry {
 	return &ComponentRegistry{
 		registry: make(map[reflect.Type]int),
+		counter:  0,
 	}
 }
 

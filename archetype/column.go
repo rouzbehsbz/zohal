@@ -9,9 +9,9 @@ import (
 type Column interface {
 	Resize(length int)
 	Len() int
-	Remove(index int) bool
-	Set(index int, value any) bool
-	Get(index int) (any, bool)
+	Remove(index int)
+	Set(index int, value any)
+	Get(index int) any
 }
 
 type ColumnEntry struct {
