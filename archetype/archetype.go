@@ -87,3 +87,9 @@ func (a *Archetype) MoveComponents(row int, dstRow int, dstArchetype *Archetype)
 		dstArchetype.AddComponent(dstRow, entry.ComponentId, component)
 	}
 }
+
+func (a *Archetype) Column(componentId int) Column {
+	entry := a.columns[componentId]
+
+	return entry.Column
+}

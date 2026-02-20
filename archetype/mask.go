@@ -1,7 +1,17 @@
 package archetype
 
-type Mask = uint32
+type Mask = uint64
 
-func MaskBit(componentId int) Mask {
-	return 1 << componentId
+func MaskBit(componentIds ...int) Mask {
+	var mask Mask
+
+	for _, componentId := range componentIds {
+		mask |= 1 << componentId
+	}
+
+	return mask
+}
+
+func MaskHasComponent(mask, query Mask) bool {
+	return mask&query == query
 }

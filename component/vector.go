@@ -6,9 +6,9 @@ type Vector struct {
 	data reflect.Value
 }
 
-func NewVector(sliceType reflect.Type) *Vector {
+func NewVector(elemType reflect.Type) *Vector {
 	return &Vector{
-		data: reflect.MakeSlice(sliceType, 0, 0),
+		data: reflect.MakeSlice(reflect.SliceOf(elemType), 0, 0),
 	}
 }
 
@@ -65,4 +65,8 @@ func (v *Vector) Get(index int) any {
 	}
 
 	return v.data.Index(index).Interface()
+}
+
+func (v *Vector) AsSlice() any {
+	return v.data.Interface()
 }

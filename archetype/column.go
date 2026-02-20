@@ -12,6 +12,7 @@ type Column interface {
 	Remove(index int)
 	Set(index int, value any)
 	Get(index int) any
+	AsSlice() any
 }
 
 type ColumnEntry struct {

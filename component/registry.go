@@ -14,8 +14,7 @@ func NewComponentRegistry() *ComponentRegistry {
 	}
 }
 
-func (c *ComponentRegistry) ComponentId(component any) int {
-	componentType := reflect.TypeOf(component)
+func (c *ComponentRegistry) componentId(componentType reflect.Type) int {
 	componentId, ok := c.registry[componentType]
 	if !ok {
 		componentId = c.counter
@@ -24,4 +23,16 @@ func (c *ComponentRegistry) ComponentId(component any) int {
 	}
 
 	return componentId
+}
+
+func (c *ComponentRegistry) ComponentId(component any) int {
+	componentType := reflect.TypeOf(component)
+
+	return c.componentId(componentType)
+}
+
+func ComponentIdFor[T any](registry *ComponentRegistry) int {
+	componentType := reflect.TypeFor[T]()
+
+	return registry.componentId(componentType)
 }

@@ -9,6 +9,8 @@ import (
 type World struct {
 	entityAllocator    *entity.EntityAllocator
 	archetypeAllocator *archetype.ArchetypeAllocator
+	scheduler          *Scheduler
+	registry           *component.ComponentRegistry
 }
 
 func NewWorld() *World {
@@ -17,15 +19,22 @@ func NewWorld() *World {
 	return &World{
 		entityAllocator:    entity.NewEntityAllocator(),
 		archetypeAllocator: archetype.NewArchetypeAllocator(registry),
+		scheduler:          NewScheduler(),
+		registry:           registry,
+	}
+}
+
+func (w *World) AddSystems(systems ...System) {
+	for _, system := range systems {
+		w.scheduler.AddSystem(system)
 	}
 }
 
 func (w *World) Spawn(components ...any) {
 	e := w.entityAllocator.Create()
-	w.archetypeAllocator.AddComponents(e, components)
+	w.archetypeAllocator.AddComponents(e, components...)
 }
 
-func (w *World) Despawn(entity entity.Entity) {
-	w.entityAllocator.Delete(entity)
-	w.archetypeAllocator.RemoveEntity(entity)
+func (w *World) Run() {
+	w.scheduler.Run(w)
 }

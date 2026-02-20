@@ -2,6 +2,7 @@ package archetype
 
 import (
 	"reflect"
+	"sort"
 
 	"github.com/rouzbehsbz/zohal/component"
 	"github.com/rouzbehsbz/zohal/entity"
@@ -31,6 +32,10 @@ func (a *ArchetypeAllocator) AddComponents(entity entity.Entity, components ...a
 		mask |= MaskBit(id)
 		entries = append(entries, component.NewComponentEntry(id, reflect.TypeOf(c)))
 	}
+
+	sort.Slice(entries, func(i, j int) bool {
+		return entries[i].Id < entries[j].Id
+	})
 
 	targetArchetype, ok := a.archetypes[mask]
 	if !ok {
@@ -84,4 +89,18 @@ func (a *ArchetypeAllocator) SetComponents(archetype *Archetype, row int, compon
 		id := a.registry.ComponentId(c)
 		archetype.AddComponent(row, id, c)
 	}
+}
+
+func (a *ArchetypeAllocator) MatchingArchetypes(componentIds ...int) []*Archetype {
+	archetypes := []*Archetype{}
+
+	for mask, archetype := range a.archetypes {
+		queryMask := MaskBit(componentIds...)
+
+		if MaskHasComponent(mask, queryMask) {
+			archetypes = append(archetypes, archetype)
+		}
+	}
+
+	return archetypes
 }
