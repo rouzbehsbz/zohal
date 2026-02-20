@@ -35,3 +35,24 @@ func Query2[A, B any](world *World, fn func(*A, *B)) {
 		}
 	}
 }
+
+func Query3[A, B, C any](world *World, fn func(*A, *B, *C)) {
+	componentAId := component.ComponentIdFor[A](world.registry)
+	componentBId := component.ComponentIdFor[B](world.registry)
+	componentCId := component.ComponentIdFor[C](world.registry)
+
+	archetypes := world.archetypeAllocator.MatchingArchetypes(componentAId, componentBId, componentCId)
+	for _, archetype := range archetypes {
+		columnA := archetype.Column(componentAId)
+		columnB := archetype.Column(componentBId)
+		columnC := archetype.Column(componentCId)
+
+		sliceA := columnA.AsSlice().([]A)
+		sliceB := columnB.AsSlice().([]B)
+		sliceC := columnC.AsSlice().([]C)
+
+		for i := range len(sliceA) {
+			fn(&sliceA[i], &sliceB[i], &sliceC[i])
+		}
+	}
+}

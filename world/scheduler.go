@@ -1,20 +1,30 @@
 package world
 
-import "time"
+import (
+	"time"
+)
 
 type Stage = uint8
 
 const (
 	StartupStage Stage = iota
+	PreUpdateStage
+	FixedUpdateStage
+	UpdateStage
 )
 
 type Scheduler struct {
 	systems map[Stage][]System
+
+	tickRate    time.Duration
+	accumulator time.Duration
 }
 
-func NewScheduler() *Scheduler {
+func NewScheduler(tickRate time.Duration) *Scheduler {
 	return &Scheduler{
-		systems: make(map[Stage][]System),
+		systems:     make(map[Stage][]System),
+		tickRate:    tickRate,
+		accumulator: 0,
 	}
 }
 
@@ -44,5 +54,29 @@ func (s *Scheduler) RunStage(world *World, stage Stage, dt time.Duration) {
 }
 
 func (s *Scheduler) Run(world *World) {
+	last := time.Now()
+
 	s.RunStage(world, StartupStage, 0)
+
+	for {
+		now := time.Now()
+		frameTime := now.Sub(last)
+		last = now
+
+		s.accumulator += frameTime
+
+		s.RunStage(world, PreUpdateStage, frameTime)
+
+		for s.accumulator >= s.tickRate {
+			s.RunStage(world, FixedUpdateStage, s.tickRate)
+			s.accumulator -= s.tickRate
+		}
+
+		s.RunStage(world, UpdateStage, frameTime)
+
+		sleepTime := s.tickRate - time.Since(now)
+		if sleepTime > 0 {
+			time.Sleep(sleepTime)
+		}
+	}
 }

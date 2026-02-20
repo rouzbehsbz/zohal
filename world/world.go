@@ -1,6 +1,8 @@
 package world
 
 import (
+	"time"
+
 	"github.com/rouzbehsbz/zohal/archetype"
 	"github.com/rouzbehsbz/zohal/component"
 	"github.com/rouzbehsbz/zohal/entity"
@@ -13,13 +15,13 @@ type World struct {
 	registry           *component.ComponentRegistry
 }
 
-func NewWorld() *World {
+func NewWorld(tickRate time.Duration) *World {
 	registry := component.NewComponentRegistry()
 
 	return &World{
 		entityAllocator:    entity.NewEntityAllocator(),
 		archetypeAllocator: archetype.NewArchetypeAllocator(registry),
-		scheduler:          NewScheduler(),
+		scheduler:          NewScheduler(tickRate),
 		registry:           registry,
 	}
 }
