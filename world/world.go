@@ -12,16 +12,19 @@ type World struct {
 	entityAllocator    *entity.EntityAllocator
 	archetypeAllocator *archetype.ArchetypeAllocator
 	scheduler          *Scheduler
+	commands           *Commands
 	registry           *component.ComponentRegistry
 }
 
 func NewWorld(tickRate time.Duration) *World {
+	commands := NewCommands()
 	registry := component.NewComponentRegistry()
 
 	return &World{
 		entityAllocator:    entity.NewEntityAllocator(),
 		archetypeAllocator: archetype.NewArchetypeAllocator(registry),
-		scheduler:          NewScheduler(tickRate),
+		scheduler:          NewScheduler(commands, tickRate),
+		commands:           commands,
 		registry:           registry,
 	}
 }
@@ -32,9 +35,10 @@ func (w *World) AddSystems(systems ...System) {
 	}
 }
 
-func (w *World) Spawn(components ...any) {
-	e := w.entityAllocator.Create()
-	w.archetypeAllocator.AddComponents(e, components...)
+func (w *World) AddCommands(commands ...Command) {
+	for _, command := range commands {
+		w.commands.AddCommand(command)
+	}
 }
 
 func (w *World) Run() {

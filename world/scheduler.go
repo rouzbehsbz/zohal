@@ -14,15 +14,17 @@ const (
 )
 
 type Scheduler struct {
-	systems map[Stage][]System
+	systems  map[Stage][]System
+	commands *Commands
 
 	tickRate    time.Duration
 	accumulator time.Duration
 }
 
-func NewScheduler(tickRate time.Duration) *Scheduler {
+func NewScheduler(commands *Commands, tickRate time.Duration) *Scheduler {
 	return &Scheduler{
 		systems:     make(map[Stage][]System),
+		commands:    commands,
 		tickRate:    tickRate,
 		accumulator: 0,
 	}
@@ -73,6 +75,8 @@ func (s *Scheduler) Run(world *World) {
 		}
 
 		s.RunStage(world, UpdateStage, frameTime)
+
+		s.commands.Apply(world)
 
 		sleepTime := s.tickRate - time.Since(now)
 		if sleepTime > 0 {
