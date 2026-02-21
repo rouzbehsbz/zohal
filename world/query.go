@@ -1,7 +1,7 @@
 package world
 
 import (
-	"github.com/rouzbehsbz/zohal/component"
+	"github.com/rouzbehsbz/zurvan/component"
 )
 
 func Query1[A any](world *World, fn func(*A)) {

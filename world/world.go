@@ -3,9 +3,9 @@ package world
 import (
 	"time"
 
-	"github.com/rouzbehsbz/zohal/archetype"
-	"github.com/rouzbehsbz/zohal/component"
-	"github.com/rouzbehsbz/zohal/entity"
+	"github.com/rouzbehsbz/zurvan/archetype"
+	"github.com/rouzbehsbz/zurvan/component"
+	"github.com/rouzbehsbz/zurvan/entity"
 )
 
 type World struct {

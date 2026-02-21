@@ -4,8 +4,8 @@ import (
 	"reflect"
 	"sort"
 
-	"github.com/rouzbehsbz/zohal/component"
-	"github.com/rouzbehsbz/zohal/entity"
+	"github.com/rouzbehsbz/zurvan/component"
+	"github.com/rouzbehsbz/zurvan/entity"
 )
 
 type ArchetypeAllocator struct {

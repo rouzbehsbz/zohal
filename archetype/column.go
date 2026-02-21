@@ -3,7 +3,7 @@ package archetype
 import (
 	"reflect"
 
-	"github.com/rouzbehsbz/zohal/component"
+	"github.com/rouzbehsbz/zurvan/component"
 )
 
 type Column interface {

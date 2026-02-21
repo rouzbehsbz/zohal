@@ -1,8 +1,8 @@
 package archetype
 
 import (
-	"github.com/rouzbehsbz/zohal/component"
-	"github.com/rouzbehsbz/zohal/entity"
+	"github.com/rouzbehsbz/zurvan/component"
+	"github.com/rouzbehsbz/zurvan/entity"
 )
 
 type Archetype struct {
