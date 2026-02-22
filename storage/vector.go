@@ -1,4 +1,4 @@
-package component
+package storage
 
 import "reflect"
 
@@ -69,4 +69,10 @@ func (v *Vector) Get(index int) any {
 
 func (v *Vector) AsSlice() any {
 	return v.data.Interface()
+}
+
+func (v *Vector) Push(value any) {
+	val := reflect.ValueOf(value)
+
+	v.data = reflect.Append(v.data, val)
 }

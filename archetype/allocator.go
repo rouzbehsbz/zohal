@@ -4,18 +4,42 @@ import (
 	"reflect"
 	"sort"
 
-	"github.com/rouzbehsbz/zurvan/component"
 	"github.com/rouzbehsbz/zurvan/entity"
+	"github.com/rouzbehsbz/zurvan/storage"
 )
+
+type EntityLocation struct {
+	Mask Mask
+	Row  int
+}
+
+func NewEntityLocation(mask Mask, row int) EntityLocation {
+	return EntityLocation{
+		Mask: mask,
+		Row:  row,
+	}
+}
+
+type ComponentEntry struct {
+	Id       int
+	ElemType reflect.Type
+}
+
+func NewComponentEntry(id int, elemType reflect.Type) ComponentEntry {
+	return ComponentEntry{
+		Id:       id,
+		ElemType: elemType,
+	}
+}
 
 type ArchetypeAllocator struct {
 	archetypes map[Mask]*Archetype
 	locations  map[entity.Entity]EntityLocation
 
-	registry *component.ComponentRegistry
+	registry *storage.Registry
 }
 
-func NewArchetypeAllocator(registry *component.ComponentRegistry) *ArchetypeAllocator {
+func NewArchetypeAllocator(registry *storage.Registry) *ArchetypeAllocator {
 	return &ArchetypeAllocator{
 		archetypes: make(map[Mask]*Archetype),
 		locations:  make(map[entity.Entity]EntityLocation),
@@ -25,12 +49,13 @@ func NewArchetypeAllocator(registry *component.ComponentRegistry) *ArchetypeAllo
 
 func (a *ArchetypeAllocator) AddComponents(entity entity.Entity, components ...any) {
 	var mask Mask
-	entries := make([]component.ComponentEntry, 0, len(components))
+
+	entries := make([]ComponentEntry, 0, len(components))
 
 	for _, c := range components {
-		id := a.registry.ComponentId(c)
+		id := a.registry.DataId(c)
 		mask |= MaskBit(id)
-		entries = append(entries, component.NewComponentEntry(id, reflect.TypeOf(c)))
+		entries = append(entries, NewComponentEntry(id, reflect.TypeOf(c)))
 	}
 
 	sort.Slice(entries, func(i, j int) bool {
@@ -39,6 +64,7 @@ func (a *ArchetypeAllocator) AddComponents(entity entity.Entity, components ...a
 
 	targetArchetype, ok := a.archetypes[mask]
 	if !ok {
+
 		targetArchetype = NewArchetype(entries)
 		a.archetypes[mask] = targetArchetype
 	}
@@ -86,7 +112,7 @@ func (a *ArchetypeAllocator) MoveEntity(entity entity.Entity, location EntityLoc
 
 func (a *ArchetypeAllocator) SetComponents(archetype *Archetype, row int, components []any) {
 	for _, c := range components {
-		id := a.registry.ComponentId(c)
+		id := a.registry.DataId(c)
 		archetype.AddComponent(row, id, c)
 	}
 }

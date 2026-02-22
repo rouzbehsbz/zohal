@@ -11,20 +11,28 @@ const (
 	PreUpdateStage
 	FixedUpdateStage
 	UpdateStage
+	PostUpdateStage
 )
+
+type System interface {
+	Stage() Stage
+	Update(w *World, dt time.Duration)
+}
 
 type Scheduler struct {
 	systems  map[Stage][]System
 	commands *Commands
+	events   *Events
 
 	tickRate    time.Duration
 	accumulator time.Duration
 }
 
-func NewScheduler(commands *Commands, tickRate time.Duration) *Scheduler {
+func NewScheduler(commands *Commands, events *Events, tickRate time.Duration) *Scheduler {
 	return &Scheduler{
 		systems:     make(map[Stage][]System),
 		commands:    commands,
+		events:      events,
 		tickRate:    tickRate,
 		accumulator: 0,
 	}
@@ -49,6 +57,8 @@ func (s *Scheduler) AddSystem(system System) {
 
 func (s *Scheduler) RunStage(world *World, stage Stage, dt time.Duration) {
 	systems := s.Stage(stage)
+
+	s.commands.Apply(world)
 
 	for _, system := range systems {
 		system.Update(world, dt)
@@ -75,8 +85,9 @@ func (s *Scheduler) Run(world *World) {
 		}
 
 		s.RunStage(world, UpdateStage, frameTime)
+		s.RunStage(world, PostUpdateStage, frameTime)
 
-		s.commands.Apply(world)
+		s.events.Clear()
 
 		sleepTime := s.tickRate - time.Since(now)
 		if sleepTime > 0 {

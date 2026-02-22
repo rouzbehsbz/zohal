@@ -1,22 +1,9 @@
 package world
 
+import "github.com/rouzbehsbz/zurvan/entity"
+
 type Command interface {
 	Execute(w *World)
-}
-
-type SpawnCommand struct {
-	components []any
-}
-
-func NewSpawnCommand(components ...any) *SpawnCommand {
-	return &SpawnCommand{
-		components: components,
-	}
-}
-
-func (s *SpawnCommand) Execute(w *World) {
-	entity := w.entityAllocator.Create()
-	w.archetypeAllocator.AddComponents(entity, s.components...)
 }
 
 type Commands struct {
@@ -39,4 +26,35 @@ func (c *Commands) Apply(w *World) {
 	}
 
 	c.commands = c.commands[:0]
+}
+
+type SpawnCommand struct {
+	components []any
+}
+
+func NewSpawnCommand(components ...any) *SpawnCommand {
+	return &SpawnCommand{
+		components: components,
+	}
+}
+
+func (s *SpawnCommand) Execute(w *World) {
+	entity := w.entityAllocator.Create()
+	w.archetypeAllocator.AddComponents(entity, s.components...)
+}
+
+type SetComponentsCommand struct {
+	entity     entity.Entity
+	components []any
+}
+
+func NewSetComponentsCommand(entity entity.Entity, components ...any) *SetComponentsCommand {
+	return &SetComponentsCommand{
+		entity:     entity,
+		components: components,
+	}
+}
+
+func (s *SetComponentsCommand) Execute(w *World) {
+	w.archetypeAllocator.AddComponents(s.entity, s.components...)
 }

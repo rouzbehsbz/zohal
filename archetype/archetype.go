@@ -1,9 +1,23 @@
 package archetype
 
 import (
-	"github.com/rouzbehsbz/zurvan/component"
+	"reflect"
+
 	"github.com/rouzbehsbz/zurvan/entity"
+	"github.com/rouzbehsbz/zurvan/storage"
 )
+
+type ColumnEntry struct {
+	ComponentId int
+	Column      storage.Column
+}
+
+func NewColumnEntry(componentId int, elemType reflect.Type) ColumnEntry {
+	return ColumnEntry{
+		ComponentId: componentId,
+		Column:      storage.NewVector(elemType),
+	}
+}
 
 type Archetype struct {
 	entities []entity.Entity
@@ -12,7 +26,7 @@ type Archetype struct {
 	componentIndex map[int]int
 }
 
-func NewArchetype(entries []component.ComponentEntry) *Archetype {
+func NewArchetype(entries []ComponentEntry) *Archetype {
 	columns := []ColumnEntry{}
 	componentIndex := make(map[int]int, len(entries))
 
@@ -88,7 +102,11 @@ func (a *Archetype) MoveComponents(row int, dstRow int, dstArchetype *Archetype)
 	}
 }
 
-func (a *Archetype) Column(componentId int) Column {
+func (a *Archetype) Entities() []entity.Entity {
+	return a.entities
+}
+
+func (a *Archetype) Column(componentId int) storage.Column {
 	entry := a.columns[componentId]
 
 	return entry.Column
