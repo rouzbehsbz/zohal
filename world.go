@@ -40,12 +40,6 @@ func (w *World) AddSystems(stage Stage, systems []System) {
 	}
 }
 
-func (w *World) AddResources(resources ...any) {
-	for _, resource := range resources {
-		w.resources.AddResource(resource)
-	}
-}
-
 func (w *World) PushCommands(commands ...Command) {
 	for _, command := range commands {
 		w.commands.AddCommand(command)

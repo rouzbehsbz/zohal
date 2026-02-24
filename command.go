@@ -56,3 +56,17 @@ func NewSetComponentsCommand(entity Entity, components ...any) *SetComponentsCom
 func (s *SetComponentsCommand) Execute(w *World) {
 	w.archetypeAllocator.AddComponents(s.entity, s.components...)
 }
+
+type AddResourceCommand struct {
+	resource any
+}
+
+func NewAddResourceCommand(resource any) *AddResourceCommand {
+	return &AddResourceCommand{
+		resource: resource,
+	}
+}
+
+func (a *AddResourceCommand) Execute(w *World) {
+	w.resources.AddResource(a.resource)
+}
