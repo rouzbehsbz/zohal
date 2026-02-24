@@ -4,48 +4,56 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/rouzbehsbz/zurvan/entity"
-	"github.com/rouzbehsbz/zurvan/world"
+	"github.com/rouzbehsbz/zurvan"
 )
 
 func main() {
-	w := world.NewWorld(100 * time.Millisecond)
+	world := zurvan.NewWorld(16 * time.Millisecond)
 
-	w.AddSystems(
-		&TakeDamageSystem{},
+	world.AddSystems(
+		&MovementSystem{},
 		&RespawnSystem{},
 	)
 
-	w.PushCommands(
-		world.NewSpawnCommand(
-			Health{Amount: 100, Max: 100},
+	world.PushCommands(
+		zurvan.NewSpawnCommand(
+			Position{X: 0, Y: 0},
+			Velocity{X: 10, Y: 10},
 		),
 	)
 
-	w.Run()
+	world.Run()
 }
 
-type Health struct {
-	Amount int
-	Max    int
+type Position struct {
+	X, Y float64
+}
+
+type Velocity struct {
+	X, Y float64
 }
 
 type DeathEvent struct {
-	Entity entity.Entity
+	Entity zurvan.Entity
 }
 
-type TakeDamageSystem struct{}
+type MovementSystem struct{}
 
-func (t *TakeDamageSystem) Stage() world.Stage {
-	return world.UpdateStage
+func (m *MovementSystem) Stage() zurvan.Stage {
+	return zurvan.UpdateStage
 }
-func (t *TakeDamageSystem) Update(w *world.World, dt time.Duration) {
-	world.Query1[Health](w, func(e entity.Entity, h *Health) {
-		h.Amount -= 10
+func (m *MovementSystem) Update(w *zurvan.World, dt time.Duration) {
+	zurvan.Query2[Position, Velocity](w, func(e zurvan.Entity, p *Position, v *Velocity) {
+		dt := dt.Seconds()
 
-		fmt.Printf("entity %d health: %d\n", e.Index, h.Amount)
+		p.X += v.X * dt
+		p.Y += v.Y * dt
 
-		if h.Amount <= 0 {
+		fmt.Printf("Position (%f, %f)\n", p.X, p.Y)
+
+		if p.X > 50 && p.Y > 50 {
+			fmt.Printf("Entering death zone\n")
+
 			w.EmitEvents(
 				DeathEvent{Entity: e},
 			)
@@ -55,18 +63,18 @@ func (t *TakeDamageSystem) Update(w *world.World, dt time.Duration) {
 
 type RespawnSystem struct{}
 
-func (r *RespawnSystem) Stage() world.Stage {
-	return world.UpdateStage
+func (m *RespawnSystem) Stage() zurvan.Stage {
+	return zurvan.UpdateStage
 }
-func (r *RespawnSystem) Update(w *world.World, dt time.Duration) {
-	events := world.OnEvent[DeathEvent](w)
+func (m *RespawnSystem) Update(w *zurvan.World, dt time.Duration) {
+	events := zurvan.OnEvent[DeathEvent](w)
 
-	for _, e := range events {
-		fmt.Printf("entity %d has died. respawning ...\n", e.Entity.Index)
+	for _, event := range events {
+		fmt.Printf("Respawning ...\n")
 
 		w.PushCommands(
-			world.NewSetComponentsCommand(e.Entity,
-				Health{Amount: 100, Max: 100},
+			zurvan.NewSetComponentsCommand(event.Entity,
+				Position{X: 0, Y: 0},
 			),
 		)
 	}

@@ -1,6 +1,4 @@
-package world
-
-import "github.com/rouzbehsbz/zurvan/entity"
+package zurvan
 
 type Command interface {
 	Execute(w *World)
@@ -44,11 +42,11 @@ func (s *SpawnCommand) Execute(w *World) {
 }
 
 type SetComponentsCommand struct {
-	entity     entity.Entity
+	entity     Entity
 	components []any
 }
 
-func NewSetComponentsCommand(entity entity.Entity, components ...any) *SetComponentsCommand {
+func NewSetComponentsCommand(entity Entity, components ...any) *SetComponentsCommand {
 	return &SetComponentsCommand{
 		entity:     entity,
 		components: components,

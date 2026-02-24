@@ -1,20 +1,18 @@
-package world
+package zurvan
 
 import (
 	"reflect"
-
-	"github.com/rouzbehsbz/zurvan/storage"
 )
 
 type Events struct {
-	columns map[int]storage.Column
+	columns map[int]Column
 
-	registry *storage.Registry
+	registry *Registry
 }
 
-func NewEvents(registry *storage.Registry) *Events {
+func NewEvents(registry *Registry) *Events {
 	return &Events{
-		columns:  make(map[int]storage.Column),
+		columns:  make(map[int]Column),
 		registry: registry,
 	}
 }
@@ -24,7 +22,7 @@ func (e *Events) Emit(event any) {
 
 	column, ok := e.columns[eventId]
 	if !ok {
-		column = storage.NewVector(reflect.TypeOf(event))
+		column = NewVector(reflect.TypeOf(event))
 		e.columns[eventId] = column
 	}
 
@@ -38,7 +36,7 @@ func (e *Events) Clear() {
 }
 
 func OnEvent[T any](w *World) []T {
-	eventId := storage.DataIdFor[T](w.events.registry)
+	eventId := DataIdFor[T](w.events.registry)
 
 	column, ok := w.events.columns[eventId]
 	if !ok {

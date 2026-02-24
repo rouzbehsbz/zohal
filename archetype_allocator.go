@@ -1,11 +1,8 @@
-package archetype
+package zurvan
 
 import (
 	"reflect"
 	"sort"
-
-	"github.com/rouzbehsbz/zurvan/entity"
-	"github.com/rouzbehsbz/zurvan/storage"
 )
 
 type EntityLocation struct {
@@ -34,20 +31,20 @@ func NewComponentEntry(id int, elemType reflect.Type) ComponentEntry {
 
 type ArchetypeAllocator struct {
 	archetypes map[Mask]*Archetype
-	locations  map[entity.Entity]EntityLocation
+	locations  map[Entity]EntityLocation
 
-	registry *storage.Registry
+	registry *Registry
 }
 
-func NewArchetypeAllocator(registry *storage.Registry) *ArchetypeAllocator {
+func NewArchetypeAllocator(registry *Registry) *ArchetypeAllocator {
 	return &ArchetypeAllocator{
 		archetypes: make(map[Mask]*Archetype),
-		locations:  make(map[entity.Entity]EntityLocation),
+		locations:  make(map[Entity]EntityLocation),
 		registry:   registry,
 	}
 }
 
-func (a *ArchetypeAllocator) AddComponents(entity entity.Entity, components ...any) {
+func (a *ArchetypeAllocator) AddComponents(entity Entity, components ...any) {
 	var mask Mask
 
 	entries := make([]ComponentEntry, 0, len(components))
@@ -62,28 +59,35 @@ func (a *ArchetypeAllocator) AddComponents(entity entity.Entity, components ...a
 		return entries[i].Id < entries[j].Id
 	})
 
+	location, exists := a.locations[entity]
+	if exists {
+		targetArchetype := a.archetypes[location.Mask]
+
+		if MaskHasComponents(location.Mask, mask) {
+			a.SetComponents(targetArchetype, location.Row, components)
+			return
+		}
+
+		targetArchetype, ok := a.archetypes[mask]
+		if !ok {
+			targetArchetype = NewArchetype(entries)
+			a.archetypes[mask] = targetArchetype
+		}
+
+		a.MoveEntity(entity, location, targetArchetype, mask)
+		return
+	}
+
 	targetArchetype, ok := a.archetypes[mask]
 	if !ok {
-
 		targetArchetype = NewArchetype(entries)
 		a.archetypes[mask] = targetArchetype
 	}
 
-	location, exists := a.locations[entity]
-	if !exists {
-		a.AddNewEntity(entity, targetArchetype, mask, components)
-		return
-	}
-
-	if mask == location.Mask {
-		a.SetComponents(targetArchetype, location.Row, components)
-		return
-	}
-
-	a.MoveEntity(entity, location, targetArchetype, mask)
+	a.AddNewEntity(entity, targetArchetype, mask, components)
 }
 
-func (a *ArchetypeAllocator) RemoveEntity(entity entity.Entity) {
+func (a *ArchetypeAllocator) RemoveEntity(entity Entity) {
 	location := a.locations[entity]
 	archetype := a.archetypes[location.Mask]
 
@@ -91,7 +95,7 @@ func (a *ArchetypeAllocator) RemoveEntity(entity entity.Entity) {
 	delete(a.locations, entity)
 }
 
-func (a *ArchetypeAllocator) AddNewEntity(entity entity.Entity, archetype *Archetype, mask Mask, components []any) {
+func (a *ArchetypeAllocator) AddNewEntity(entity Entity, archetype *Archetype, mask Mask, components []any) {
 	row := archetype.AddEntity(entity)
 
 	a.SetComponents(archetype, row, components)
@@ -99,7 +103,7 @@ func (a *ArchetypeAllocator) AddNewEntity(entity entity.Entity, archetype *Arche
 	a.locations[entity] = NewEntityLocation(mask, row)
 }
 
-func (a *ArchetypeAllocator) MoveEntity(entity entity.Entity, location EntityLocation, target *Archetype, newMask Mask) {
+func (a *ArchetypeAllocator) MoveEntity(entity Entity, location EntityLocation, target *Archetype, newMask Mask) {
 	source := a.archetypes[location.Mask]
 
 	newRow := target.AddEntity(entity)
@@ -123,7 +127,7 @@ func (a *ArchetypeAllocator) MatchingArchetypes(componentIds ...int) []*Archetyp
 	for mask, archetype := range a.archetypes {
 		queryMask := MaskBit(componentIds...)
 
-		if MaskHasComponent(mask, queryMask) {
+		if MaskHasComponents(mask, queryMask) {
 			archetypes = append(archetypes, archetype)
 		}
 	}

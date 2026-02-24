@@ -1,12 +1,7 @@
-package world
+package zurvan
 
-import (
-	"github.com/rouzbehsbz/zurvan/entity"
-	"github.com/rouzbehsbz/zurvan/storage"
-)
-
-func Query1[A any](world *World, fn func(entity.Entity, *A)) {
-	componentId := storage.DataIdFor[A](world.componentRegistry)
+func Query1[A any](world *World, fn func(Entity, *A)) {
+	componentId := DataIdFor[A](world.componentRegistry)
 
 	archetypes := world.archetypeAllocator.MatchingArchetypes(componentId)
 	for _, archetype := range archetypes {
@@ -20,9 +15,9 @@ func Query1[A any](world *World, fn func(entity.Entity, *A)) {
 	}
 }
 
-func Query2[A, B any](world *World, fn func(entity.Entity, *A, *B)) {
-	componentAId := storage.DataIdFor[A](world.componentRegistry)
-	componentBId := storage.DataIdFor[B](world.componentRegistry)
+func Query2[A, B any](world *World, fn func(Entity, *A, *B)) {
+	componentAId := DataIdFor[A](world.componentRegistry)
+	componentBId := DataIdFor[B](world.componentRegistry)
 
 	archetypes := world.archetypeAllocator.MatchingArchetypes(componentAId, componentBId)
 	for _, archetype := range archetypes {
@@ -40,10 +35,10 @@ func Query2[A, B any](world *World, fn func(entity.Entity, *A, *B)) {
 	}
 }
 
-func Query3[A, B, C any](world *World, fn func(entity.Entity, *A, *B, *C)) {
-	componentAId := storage.DataIdFor[A](world.componentRegistry)
-	componentBId := storage.DataIdFor[B](world.componentRegistry)
-	componentCId := storage.DataIdFor[C](world.componentRegistry)
+func Query3[A, B, C any](world *World, fn func(Entity, *A, *B, *C)) {
+	componentAId := DataIdFor[A](world.componentRegistry)
+	componentBId := DataIdFor[B](world.componentRegistry)
+	componentCId := DataIdFor[C](world.componentRegistry)
 
 	archetypes := world.archetypeAllocator.MatchingArchetypes(componentAId, componentBId, componentCId)
 	for _, archetype := range archetypes {

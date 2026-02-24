@@ -1,26 +1,23 @@
-package archetype
+package zurvan
 
 import (
 	"reflect"
-
-	"github.com/rouzbehsbz/zurvan/entity"
-	"github.com/rouzbehsbz/zurvan/storage"
 )
 
 type ColumnEntry struct {
 	ComponentId int
-	Column      storage.Column
+	Column      Column
 }
 
 func NewColumnEntry(componentId int, elemType reflect.Type) ColumnEntry {
 	return ColumnEntry{
 		ComponentId: componentId,
-		Column:      storage.NewVector(elemType),
+		Column:      NewVector(elemType),
 	}
 }
 
 type Archetype struct {
-	entities []entity.Entity
+	entities []Entity
 	columns  []ColumnEntry
 
 	componentIndex map[int]int
@@ -39,13 +36,13 @@ func NewArchetype(entries []ComponentEntry) *Archetype {
 	}
 
 	return &Archetype{
-		entities:       []entity.Entity{},
+		entities:       []Entity{},
 		columns:        columns,
 		componentIndex: componentIndex,
 	}
 }
 
-func (a *Archetype) IsEntityAlive(entity entity.Entity, row int) bool {
+func (a *Archetype) IsEntityAlive(entity Entity, row int) bool {
 	if row >= len(a.entities) {
 		return false
 	}
@@ -55,7 +52,7 @@ func (a *Archetype) IsEntityAlive(entity entity.Entity, row int) bool {
 	return e.Index == entity.Index && e.Generation == entity.Generation
 }
 
-func (a *Archetype) AddEntity(entity entity.Entity) int {
+func (a *Archetype) AddEntity(entity Entity) int {
 	row := len(a.entities)
 	a.entities = append(a.entities, entity)
 
@@ -66,10 +63,10 @@ func (a *Archetype) AddEntity(entity entity.Entity) int {
 	return row
 }
 
-func (a *Archetype) RemoveEntity(row int) (entity.Entity, int) {
+func (a *Archetype) RemoveEntity(row int) (Entity, int) {
 	length := len(a.entities)
 	if row >= length {
-		return entity.Entity{}, -1
+		return Entity{}, -1
 	}
 
 	lastIndex := length - 1
@@ -86,7 +83,7 @@ func (a *Archetype) RemoveEntity(row int) (entity.Entity, int) {
 		return swapped, row
 	}
 
-	return entity.Entity{}, -1
+	return Entity{}, -1
 }
 
 func (a *Archetype) AddComponent(row int, componentId int, component any) {
@@ -102,11 +99,11 @@ func (a *Archetype) MoveComponents(row int, dstRow int, dstArchetype *Archetype)
 	}
 }
 
-func (a *Archetype) Entities() []entity.Entity {
+func (a *Archetype) Entities() []Entity {
 	return a.entities
 }
 
-func (a *Archetype) Column(componentId int) storage.Column {
+func (a *Archetype) Column(componentId int) Column {
 	entry := a.columns[componentId]
 
 	return entry.Column

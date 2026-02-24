@@ -1,4 +1,4 @@
-package entity
+package zurvan
 
 type EntityAllocator struct {
 	generations []int

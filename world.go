@@ -1,34 +1,30 @@
-package world
+package zurvan
 
 import (
 	"time"
-
-	"github.com/rouzbehsbz/zurvan/archetype"
-	"github.com/rouzbehsbz/zurvan/entity"
-	"github.com/rouzbehsbz/zurvan/storage"
 )
 
 type World struct {
-	entityAllocator    *entity.EntityAllocator
-	archetypeAllocator *archetype.ArchetypeAllocator
+	entityAllocator    *EntityAllocator
+	archetypeAllocator *ArchetypeAllocator
 
 	scheduler *Scheduler
 	commands  *Commands
 	events    *Events
 
-	componentRegistry *storage.Registry
+	componentRegistry *Registry
 }
 
 func NewWorld(tickRate time.Duration) *World {
-	componentRegistry := storage.NewRegistry()
-	eventRegistry := storage.NewRegistry()
+	componentRegistry := NewRegistry()
+	eventRegistry := NewRegistry()
 
 	commands := NewCommands()
 	events := NewEvents(eventRegistry)
 
 	return &World{
-		entityAllocator:    entity.NewEntityAllocator(),
-		archetypeAllocator: archetype.NewArchetypeAllocator(componentRegistry),
+		entityAllocator:    NewEntityAllocator(),
+		archetypeAllocator: NewArchetypeAllocator(componentRegistry),
 		scheduler:          NewScheduler(commands, events, tickRate),
 		commands:           commands,
 		events:             events,

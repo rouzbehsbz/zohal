@@ -1,4 +1,4 @@
-package entity
+package zurvan
 
 type Entity struct {
 	Index      int

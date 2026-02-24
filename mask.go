@@ -1,4 +1,4 @@
-package archetype
+package zurvan
 
 type Mask = uint64
 
@@ -12,6 +12,6 @@ func MaskBit(componentIds ...int) Mask {
 	return mask
 }
 
-func MaskHasComponent(mask, query Mask) bool {
+func MaskHasComponents(mask, query Mask) bool {
 	return mask&query == query
 }
