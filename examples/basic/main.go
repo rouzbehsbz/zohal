@@ -11,8 +11,10 @@ func main() {
 	world := zurvan.NewWorld(16 * time.Millisecond)
 
 	world.AddSystems(
-		&MovementSystem{},
-		&RespawnSystem{},
+		zurvan.BuildStageSystems(zurvan.UpdateStage,
+			&MovementSystem{},
+			&RespawnSystem{},
+		),
 	)
 
 	world.PushCommands(

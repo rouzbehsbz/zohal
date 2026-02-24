@@ -32,9 +32,9 @@ func NewWorld(tickRate time.Duration) *World {
 	}
 }
 
-func (w *World) AddSystems(systems ...System) {
+func (w *World) AddSystems(stage Stage, systems []System) {
 	for _, system := range systems {
-		w.scheduler.AddSystem(system)
+		w.scheduler.AddSystem(stage, system)
 	}
 }
 

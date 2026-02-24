@@ -15,8 +15,11 @@ const (
 )
 
 type System interface {
-	Stage() Stage
 	Update(w *World, dt time.Duration)
+}
+
+func BuildStageSystems(stage Stage, systems ...System) (Stage, []System) {
+	return stage, systems
 }
 
 type Scheduler struct {
@@ -48,8 +51,7 @@ func (s *Scheduler) Stage(stage Stage) []System {
 	return systems
 }
 
-func (s *Scheduler) AddSystem(system System) {
-	stage := system.Stage()
+func (s *Scheduler) AddSystem(stage Stage, system System) {
 	systems := s.Stage(stage)
 	systems = append(systems, system)
 	s.systems[stage] = systems
