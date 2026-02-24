@@ -11,6 +11,7 @@ type World struct {
 	scheduler *Scheduler
 	commands  *Commands
 	events    *Events
+	resources *Resources
 
 	componentRegistry *Registry
 }
@@ -28,6 +29,7 @@ func NewWorld(tickRate time.Duration) *World {
 		scheduler:          NewScheduler(commands, events, tickRate),
 		commands:           commands,
 		events:             events,
+		resources:          NewResources(),
 		componentRegistry:  componentRegistry,
 	}
 }
@@ -35,6 +37,12 @@ func NewWorld(tickRate time.Duration) *World {
 func (w *World) AddSystems(stage Stage, systems []System) {
 	for _, system := range systems {
 		w.scheduler.AddSystem(stage, system)
+	}
+}
+
+func (w *World) AddResources(resources ...any) {
+	for _, resource := range resources {
+		w.resources.AddResource(resource)
 	}
 }
 
