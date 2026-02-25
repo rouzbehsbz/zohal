@@ -60,8 +60,6 @@ func (s *Scheduler) AddSystem(stage Stage, system System) {
 func (s *Scheduler) RunStage(world *World, stage Stage, dt time.Duration) {
 	systems := s.Stage(stage)
 
-	s.commands.Apply(world)
-
 	for _, system := range systems {
 		system.Update(world, dt)
 	}
@@ -89,6 +87,7 @@ func (s *Scheduler) Run(world *World) {
 		s.RunStage(world, UpdateStage, frameTime)
 		s.RunStage(world, PostUpdateStage, frameTime)
 
+		s.commands.Apply(world)
 		s.events.Clear()
 
 		sleepTime := s.tickRate - time.Since(now)

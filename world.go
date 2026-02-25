@@ -40,6 +40,10 @@ func (w *World) AddSystems(stage Stage, systems []System) {
 	}
 }
 
+func (w *World) Spawn() Entity {
+	return w.entityAllocator.Create()
+}
+
 func (w *World) PushCommands(commands ...Command) {
 	for _, command := range commands {
 		w.commands.AddCommand(command)

@@ -19,26 +19,15 @@ func (c *Commands) AddCommand(command Command) {
 }
 
 func (c *Commands) Apply(w *World) {
+	if len(c.commands) == 0 {
+		return
+	}
+
 	for _, command := range c.commands {
 		command.Execute(w)
 	}
 
 	c.commands = c.commands[:0]
-}
-
-type SpawnCommand struct {
-	components []any
-}
-
-func NewSpawnCommand(components ...any) *SpawnCommand {
-	return &SpawnCommand{
-		components: components,
-	}
-}
-
-func (s *SpawnCommand) Execute(w *World) {
-	entity := w.entityAllocator.Create()
-	w.archetypeAllocator.AddComponents(entity, s.components...)
 }
 
 type SetComponentsCommand struct {
@@ -69,4 +58,19 @@ func NewAddResourceCommand(resource any) *AddResourceCommand {
 
 func (a *AddResourceCommand) Execute(w *World) {
 	w.resources.AddResource(a.resource)
+}
+
+type DespawnCommand struct {
+	entity Entity
+}
+
+func NewDespawnCommand(entity Entity) *DespawnCommand {
+	return &DespawnCommand{
+		entity: entity,
+	}
+}
+
+func (d *DespawnCommand) Execute(w *World) {
+	w.archetypeAllocator.RemoveEntity(d.entity)
+	w.entityAllocator.Delete(d.entity)
 }

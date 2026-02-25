@@ -17,8 +17,11 @@ func main() {
 		),
 	)
 
+	e := world.Spawn()
+
 	world.PushCommands(
-		zurvan.NewSpawnCommand(
+		zurvan.NewSetComponentsCommand(
+			e,
 			Position{X: 0, Y: 0},
 			Velocity{X: 10, Y: 10},
 		),
