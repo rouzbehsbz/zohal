@@ -21,16 +21,14 @@ func (r *Resources) AddResource(resource any) {
 	r.storage[resourceId] = resource
 }
 
-func Resource[T any](w *World) T {
+func Resource[T any](w *World) (T, bool) {
 	resourceId := DataIdFor[T](w.resources.registry)
 
 	resource, ok := w.resources.storage[resourceId]
 	if !ok {
 		var defaultVal T
-
-		resource = defaultVal
-		w.resources.storage[resourceId] = resource
+		return defaultVal, false
 	}
 
-	return resource.(T)
+	return resource.(T), true
 }
