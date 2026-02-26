@@ -1,0 +1,6 @@
+- The event system needs to be redesigned and should clear events only after all subscribers have read them.
+- The entity allocator uses a mutex for thread safety and needs to be rewritten using a better lock-free algorithm.
+- Add a way to query a specific entity by a set of components.
+- Revise queries to determine whether it is beneficial to have a read-only version.
+- Use the Spenta data-parallel library in different iterators throughout the engine where needed.
+- Provide a way to define bundles of components for entities.
