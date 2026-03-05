@@ -22,7 +22,7 @@ func main() {
 	world.PushCommands(
 		zurvan.NewSetComponentsCommand(
 			e,
-			&Position{X: 0, Y: 0},
+			Position{X: 0, Y: 0},
 			Velocity{X: 10, Y: 10},
 		),
 	)
@@ -48,20 +48,22 @@ func (m *MovementSystem) Stage() zurvan.Stage {
 	return zurvan.UpdateStage
 }
 func (m *MovementSystem) Update(w *zurvan.World, dt time.Duration) {
-	zurvan.Query2[*Position, Velocity](w, func(e zurvan.Entity, p *Position, v Velocity) {
-		dt := dt.Seconds()
+	sec := dt.Seconds()
 
-		p.X += v.X * dt
-		p.Y += v.Y * dt
+	zurvan.QueryMany2[Position, Velocity](w, func(entities []zurvan.Entity, p []Position, v []Velocity) {
+		for i, e := range entities {
+			p[i].X += v[i].X * sec
+			p[i].Y += v[i].Y * sec
 
-		fmt.Printf("Position (%f, %f)\n", p.X, p.Y)
+			fmt.Printf("pos: %v\n", p[i])
 
-		if p.X > 50 && p.Y > 50 {
-			fmt.Printf("Entering death zone\n")
-
-			w.EmitEvents(
-				DeathEvent{Entity: e},
-			)
+			if p[i].X > 50 && p[i].Y > 50 {
+				w.EmitEvents(
+					DeathEvent{
+						Entity: e,
+					},
+				)
+			}
 		}
 	})
 }
@@ -79,7 +81,7 @@ func (m *RespawnSystem) Update(w *zurvan.World, dt time.Duration) {
 
 		w.PushCommands(
 			zurvan.NewSetComponentsCommand(event.Entity,
-				&Position{X: 0, Y: 0},
+				Position{X: 0, Y: 0},
 			),
 		)
 	}

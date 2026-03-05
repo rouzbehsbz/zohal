@@ -118,6 +118,16 @@ func (a *ArchetypeAllocator) MatchingArchetypes(componentIds ...int) []*Archetyp
 	return archetypes
 }
 
+func (a *ArchetypeAllocator) MatchingArchetype(entity Entity) (*Archetype, int) {
+	location, ok := a.locations[entity]
+	if !ok {
+		return nil, -1
+	}
+
+	archetype := a.archetypes[location.Mask]
+	return archetype, location.Row
+}
+
 func (a *ArchetypeAllocator) setComponents(archetype *Archetype, row int, components []any) {
 	for _, c := range components {
 		id := a.registry.DataId(c)

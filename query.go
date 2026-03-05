@@ -1,6 +1,6 @@
 package zurvan
 
-func Query1[A any](world *World, fn func(Entity, A)) {
+func QueryMany1[A any](world *World, fn func([]Entity, []A)) {
 	componentId := DataIdFor[A](world.componentRegistry)
 
 	archetypes := world.archetypeAllocator.MatchingArchetypes(componentId)
@@ -9,13 +9,11 @@ func Query1[A any](world *World, fn func(Entity, A)) {
 		column := archetype.Column(componentId)
 		slice := column.AsSlice().([]A)
 
-		for i := range len(entities) {
-			fn(entities[i], slice[i])
-		}
+		fn(entities, slice)
 	}
 }
 
-func Query2[A, B any](world *World, fn func(Entity, A, B)) {
+func QueryMany2[A, B any](world *World, fn func([]Entity, []A, []B)) {
 	componentAId := DataIdFor[A](world.componentRegistry)
 	componentBId := DataIdFor[B](world.componentRegistry)
 
@@ -29,13 +27,11 @@ func Query2[A, B any](world *World, fn func(Entity, A, B)) {
 		sliceA := columnA.AsSlice().([]A)
 		sliceB := columnB.AsSlice().([]B)
 
-		for i := range len(entities) {
-			fn(entities[i], sliceA[i], sliceB[i])
-		}
+		fn(entities, sliceA, sliceB)
 	}
 }
 
-func Query3[A, B, C any](world *World, fn func(Entity, A, B, C)) {
+func QueryMany3[A, B, C any](world *World, fn func([]Entity, []A, []B, []C)) {
 	componentAId := DataIdFor[A](world.componentRegistry)
 	componentBId := DataIdFor[B](world.componentRegistry)
 	componentCId := DataIdFor[C](world.componentRegistry)
@@ -52,13 +48,11 @@ func Query3[A, B, C any](world *World, fn func(Entity, A, B, C)) {
 		sliceB := columnB.AsSlice().([]B)
 		sliceC := columnC.AsSlice().([]C)
 
-		for i := range len(entities) {
-			fn(entities[i], sliceA[i], sliceB[i], sliceC[i])
-		}
+		fn(entities, sliceA, sliceB, sliceC)
 	}
 }
 
-func Query4[A, B, C, D any](world *World, fn func(Entity, A, B, C, D)) {
+func QueryMany4[A, B, C, D any](world *World, fn func([]Entity, []A, []B, []C, []D)) {
 	componentAId := DataIdFor[A](world.componentRegistry)
 	componentBId := DataIdFor[B](world.componentRegistry)
 	componentCId := DataIdFor[C](world.componentRegistry)
@@ -78,8 +72,83 @@ func Query4[A, B, C, D any](world *World, fn func(Entity, A, B, C, D)) {
 		sliceC := columnC.AsSlice().([]C)
 		sliceD := columnD.AsSlice().([]D)
 
-		for i := range len(entities) {
-			fn(entities[i], sliceA[i], sliceB[i], sliceC[i], sliceD[i])
-		}
+		fn(entities, sliceA, sliceB, sliceC, sliceD)
 	}
+}
+
+func QueryOne1[A any](world *World, entity Entity) *A {
+	componentId := DataIdFor[A](world.componentRegistry)
+
+	archetype, row := world.archetypeAllocator.MatchingArchetype(entity)
+	if archetype == nil || row == -1 {
+		return nil
+	}
+
+	column := archetype.Column(componentId)
+	data := column.Get(row).(A)
+
+	return &data
+}
+
+func QueryOne2[A, B any](world *World, entity Entity) (*A, *B) {
+	componentAId := DataIdFor[A](world.componentRegistry)
+	componentBId := DataIdFor[B](world.componentRegistry)
+
+	archetype, row := world.archetypeAllocator.MatchingArchetype(entity)
+	if archetype == nil || row == -1 {
+		return nil, nil
+	}
+
+	columnA := archetype.Column(componentAId)
+	columnB := archetype.Column(componentBId)
+
+	dataA := columnA.Get(row).(A)
+	dataB := columnB.Get(row).(B)
+
+	return &dataA, &dataB
+}
+
+func QueryOne3[A, B, C any](world *World, entity Entity) (*A, *B, *C) {
+	componentAId := DataIdFor[A](world.componentRegistry)
+	componentBId := DataIdFor[B](world.componentRegistry)
+	componentCId := DataIdFor[C](world.componentRegistry)
+
+	archetype, row := world.archetypeAllocator.MatchingArchetype(entity)
+	if archetype == nil || row == -1 {
+		return nil, nil, nil
+	}
+
+	columnA := archetype.Column(componentAId)
+	columnB := archetype.Column(componentBId)
+	columnC := archetype.Column(componentCId)
+
+	dataA := columnA.Get(row).(A)
+	dataB := columnB.Get(row).(B)
+	dataC := columnC.Get(row).(C)
+
+	return &dataA, &dataB, &dataC
+}
+
+func QueryOne4[A, B, C, D any](world *World, entity Entity) (*A, *B, *C, *D) {
+	componentAId := DataIdFor[A](world.componentRegistry)
+	componentBId := DataIdFor[B](world.componentRegistry)
+	componentCId := DataIdFor[C](world.componentRegistry)
+	componentDId := DataIdFor[D](world.componentRegistry)
+
+	archetype, row := world.archetypeAllocator.MatchingArchetype(entity)
+	if archetype == nil || row == -1 {
+		return nil, nil, nil, nil
+	}
+
+	columnA := archetype.Column(componentAId)
+	columnB := archetype.Column(componentBId)
+	columnC := archetype.Column(componentCId)
+	columnD := archetype.Column(componentDId)
+
+	dataA := columnA.Get(row).(A)
+	dataB := columnB.Get(row).(B)
+	dataC := columnC.Get(row).(C)
+	dataD := columnD.Get(row).(D)
+
+	return &dataA, &dataB, &dataC, &dataD
 }

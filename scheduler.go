@@ -12,6 +12,7 @@ const (
 	FixedUpdateStage
 	UpdateStage
 	PostUpdateStage
+	EndStage
 )
 
 type System interface {
@@ -23,6 +24,8 @@ func BuildStageSystems(stage Stage, systems ...System) (Stage, []System) {
 }
 
 type Scheduler struct {
+	isRunning bool
+
 	systems  map[Stage][]System
 	commands *Commands
 	events   *Events
@@ -33,6 +36,7 @@ type Scheduler struct {
 
 func NewScheduler(commands *Commands, events *Events, tickRate time.Duration) *Scheduler {
 	return &Scheduler{
+		isRunning:   true,
 		systems:     make(map[Stage][]System),
 		commands:    commands,
 		events:      events,
@@ -72,7 +76,7 @@ func (s *Scheduler) Run(world *World) {
 
 	s.RunStage(world, StartupStage, 0)
 
-	for {
+	for s.isRunning {
 		now := time.Now()
 		frameTime := now.Sub(last)
 		last = now
@@ -96,4 +100,6 @@ func (s *Scheduler) Run(world *World) {
 			time.Sleep(sleepTime)
 		}
 	}
+
+	s.RunStage(world, EndStage, 0)
 }
